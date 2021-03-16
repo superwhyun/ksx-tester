@@ -1,0 +1,30 @@
+.list {
+    list-style: none;
+    margin-top:2px;
+    padding:0;
+    border: 1px solid grey;
+    border-radius: 3px;
+}
+
+.list li:hover {
+    background:#a3a1a1;
+}
+
+.itemM {
+    padding: 5px;
+    background:#e2e2e2;
+}
+
+
+
+.itemO {
+    padding: 5px;
+    background:#e2e2e2;
+}
+
+.itemX {
+    padding: 5px;
+    background:#e2e2e2;
+    text-decoration: line-through;
+    color: gray;
+}

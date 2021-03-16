@@ -1,0 +1,21 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "1.19.0",
+    "express-fileupload": "1.2.1",
+    "express": "4.17.1",
+    "jsmodbus": "4.0.5",
+    "plantuml-encoder": "1.4.0",
+    "serialport": "9.0.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
