@@ -1,7 +1,19 @@
 # ksx-tester
 
+## Prerequisite
 
-## 디렉토리 구성
+```
+$ sudo apt-get update
+$ sudo apt-get upgrade
+$ sudo apt-get install -y build-essential
+$ sudo apt-get install curl
+$ curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash --
+$ sudo apt-get install -y nodejs
+
+```
+
+
+## 구성
 
 ###	serialserver
 테스트용 모드버스 서버 (라즈베리파이에서 실행)
