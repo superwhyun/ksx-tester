@@ -5,7 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /*background-color: #1b1b1b;*/
+  background-color: #f8f9fa;
 }
 
 code {
@@ -80,7 +80,8 @@ code {
 }
 
 .heightLine {
-  height: calc(100vh - 220px);
+  height: calc(100vh - 240px);
+  overflow: auto;
 }
 
 .heightDevice {
@@ -90,6 +91,10 @@ code {
 }
 
 .heightPopup {
-  height: calc(100vh - 120px);
+  height: calc(100vh - 200px);
   overflow: auto;
+}
+
+html {
+  font-size: 15px;
 }

@@ -48,6 +48,9 @@ app.use(fileUpload());
 
 app.get('/devicespeclist', (req, res) => {
   try {
+
+    !fs.existsSync(deviceSpecDir) && fs.mkdirSync(deviceSpecDir);
+
     var files = fs.readdirSync(deviceSpecDir);
 
     var rslts = [];
@@ -130,7 +133,7 @@ app.post('/devicespec', (req, res) => {
 
   !fs.existsSync(deviceSpecDir) && fs.mkdirSync(deviceSpecDir);
 
-  console.log(req.files);
+  //console.log(req.files);
 
   var filename = req.files.file.name;
 
@@ -191,7 +194,7 @@ app.put('/testspec', (req, res) => {
     let data = "";
 
     req.body.data.map((test) => {
-      console.log(test.test);
+      //console.log(test.test);
       if (data.length > 0) data += "\n";
       data += test.test;
     });
@@ -214,6 +217,8 @@ app.put('/testspec', (req, res) => {
 
 app.get('/testspeclist', (req, res) => {
   try {
+    !fs.existsSync(testSpecDir) && fs.mkdirSync(testSpecDir);
+    
     var files = fs.readdirSync(testSpecDir);
 
     var rslts = [];
@@ -278,7 +283,7 @@ app.delete('/testspec', (req, res) => {
 app.get('/serialport', (req, res) => {
   try {
     deviceConnect.getSerialPorts((ports) => {
-      console.log(ports);
+      //console.log(ports);
 
       res.send(JSON.stringify({
         result:"success",
@@ -301,14 +306,14 @@ app.post('/serialport', (req, res) => {
   let device = req.body.device;
   let test = req.body.test;
 
-  console.log(path);
-  console.log(device);
-  console.log(test);
-  console.log(slave);
+  //console.log(path);
+  //console.log(device);
+  //console.log(test);
+  //console.log(slave);
 
   deviceConnect.connect(path, slave, (rslt, e, client) => {
     if (!rslt) {
-      console.log(e);
+      //console.log(e);
       res.send(JSON.stringify({
         result:"error",
         errormsg:String(e)
@@ -341,8 +346,8 @@ app.post('/serialport', (req, res) => {
             umlstr += UMLREQERR + ts.error + ts.command + '\n';
             umlstrsimple += UMLREQERR + ts.error + ts.command + '\n';
           } else if (ts.set) {
-            console.log('ts.set');
-            console.log(ts.set);
+            //console.log('ts.set');
+            //console.log(ts.set);
 
             umlstr += 'group ' + ts.command + '\n';
 
@@ -476,8 +481,8 @@ app.post('/serialport', (req, res) => {
           } else if (ts.get) {
             //umlstr += UMLREQ + ts.command + '\n';
 
-            console.log('ts.get');
-            console.log(ts.get);
+            //console.log('ts.get');
+            //console.log(ts.get);
 
             lastGet = [];
 
@@ -569,16 +574,16 @@ app.post('/serialport', (req, res) => {
             }
 
           } else if (ts.sleep) {
-            console.log('ts.sleep');
-            console.log(ts.sleep);
+            //console.log('ts.sleep');
+            //console.log(ts.sleep);
 
             umlstr += '...sleep ' + ts.sleep + ' ms...\n';
             umlstrsimple += '...sleep ' + ts.sleep + ' ms...\n';
 
             await SLEEP(ts.sleep);
           } else if (ts.expect) {
-            console.log('ts.expect');
-            console.log(ts.expect);
+            //console.log('ts.expect');
+            //console.log(ts.expect);
 
             if (lastGet.length <= 0) {
               umlstr += UMLNOTEEXPECT;
@@ -639,7 +644,7 @@ app.post('/serialport', (req, res) => {
       })().then(() => {
         deviceConnect.disconnect(e);
 
-        console.log(umlstr);
+        //console.log(umlstr);
         let enc = plantumlEncoder.encode(umlstr);
         let encsimple = plantumlEncoder.encode(umlstrsimple);
 

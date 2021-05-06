@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
-import { Container, Dropdown, Row, Col, Button, Alert } from 'react-bootstrap';
+import { Button } from 'primereact/button';
 import * as Data from './data'
-//import CommSpec from './CommSpec'
-//import NewWindow from 'react-new-window'
 import CommSpecComponent from './CommSpecComponent'
 import DeviceSpecPopup from './DeviceSpecPopup'
+import { Toast } from 'primereact/toast';
+import { confirmPopup } from 'primereact/confirmpopup';
+import { Dropdown } from 'primereact/dropdown';
+import { InputText } from "primereact/inputtext";
+import { Panel } from 'primereact/panel';
 
 export default class EquipManage extends Component {
     state = {
@@ -86,6 +89,7 @@ export default class EquipManage extends Component {
         this.setJson(json);
         document.getElementById('deviceSpecNameInput').value = name;
         this.setDeviceSpecName();
+        this.setState({showFiles:false});
     }
 
     onCommSpecChange = () => {
@@ -146,95 +150,38 @@ export default class EquipManage extends Component {
             
             json.Devices.map((dvc, idx) => {
                 dvclist['tmp' + idx] = dvc;
+                return dvc;
             });
 
             this.setState({addDeviceList:dvclist});
         }
     }
-/*
-    onFilesUnload = () => {
-        this.setState({showFiles:false, files:null, selectFile:null, fileJson:null});
-    }
 
-    getFiles = () => {
-
-        fetch("/devicespeclist", {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            method: 'GET'
-        }).then(res => res.json())
-        .then(
-            (result) => {
-                if (result.result !== "success") {
-                    alert("파일 검색 실패! " + result.errormsg);
-                } else {
-                    this.setState({files:result.files});
-                }
-            },
-            (error) => {
-                alert("파일 검색 실패! " + error);
-            }
-        )
-    }
-
-    onListSelect = (file) =>{
-        this.setState({selectFile:file});
-
-        fetch("/devicespec?file=" + file, {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            method: 'GET'
-        }).then(res => res.json())
-        .then(
-            (result) => {
-                if (result.result !== "success") {
-                    alert("파일 검색 실패! " + result.errormsg);
-                } else {
-                    this.setState({fileJson:result.json});
-                }
-            },
-            (error) => {
-                alert("파일 검색 실패! " + error);
-            }
-        )
-    }
-
-    onRemoveFile = () =>{
-        
-        if (this.state.selectFile == null) {
-            this.setState({addDeviceMessage:"삭제할 장비 규격 파일을 선택하세요."});
-            return;
-        }
-
-        fetch("/devicespec?file=" + this.state.selectFile, {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            method: 'DELETE'
-        }).then(res => res.json())
-        .then(
-            (result) => {
-                if (result.result !== "success") {
-                    alert("파일 삭제 실패! " + result.errormsg);
-                } else {
-                    this.onShowFiles();
-                }
-            },
-            (error) => {
-                alert("파일 삭제 실패! " + error);
-            }
-        )
-    }
-*/
     onAddDevice = (name, json) => {
+        if (this.state.type === 'sensor-node') {
+            if (json.Class !== 'sensor') {
+                console.log(json);
+                this.toastBL.show({severity:'error', summary: '추가 실패', detail:'sensor-node 에는 sensor만 추가할 수 있습니다.', life: 3000});
+                return;
+            }
+        } else if (this.state.type === 'actuator-node') {
+            if (json.Class !== 'actuator') {
+                console.log(json);
+                this.toastBL.show({severity:'error', summary: '추가 실패', detail:'actuator-node 에는 actuator만 추가할 수 있습니다.', life: 3000});
+                return;
+            }
+        }
+        if (this.state.addDeviceList[name]) {
+            let idx = 1;
+            while(true) {
+                if (!this.state.addDeviceList[name+'_'+idx]) {
+                    this.state.addDeviceList[name+'_'+idx] = json;
+                    break;
+                }
 
-        /*if (this.state.selectFile == null || this.state.fileJson == null) {
-            this.setState({addDeviceMessage:"추가할 장비 규격 파일을 선택하세요."});
-            return;
-        }*/
-
+                idx++;
+            }
+        }
         this.state.addDeviceList[name] = json;
         this.setState({addDeviceList:this.state.addDeviceList});
     }
@@ -245,14 +192,25 @@ export default class EquipManage extends Component {
     }
 
 
-    saveClick = () => {
+    saveClick = (event) => {
 
         // 문법검사필요
         // starting register 생략 가능 (노드 제외)
         if (!this.state.deviceSpecName) {
-            this.setSaveMsg(false, '장비 규격 이름을 입력하세요.');
+            //this.setSaveMsg(false, '장비 규격 이름을 입력하세요.');
+            this.toastBL.show({severity:'error', summary: 'Error', detail:'장비 규격 이름을 입력하세요.', life: 3000});
             return;
         }
+
+        let overwriteConfirm = {
+            target: event ? event.currentTarget : null,
+            message: '동일한 이름의 장비 규격 파일이 있습니다. 덮어쓰시겠습니까?',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel:'예',
+            rejectLabel:'아니오',
+            accept: this.overwriteClick,
+            reject: null
+        };
 
         fetch("/devicespec", {
             body: JSON.stringify({
@@ -267,18 +225,23 @@ export default class EquipManage extends Component {
         .then(
             (result) => {
                 if (result.result === "error") {
-                    this.setSaveMsg(false, result.errormsg);
+                    //this.setSaveMsg(false, result.errormsg);
+                    this.toastBL.show({severity:'error', summary: '저장 실패', detail:result.errormsg, life: 3000});
                 } else if (result.result === "duplicate") {
-                    this.state.overwriteMessage = true;
-                    this.setSaveMsg(false, null);
+                    //this.state.overwriteMessage = true;
+                    //this.setSaveMsg(false, null);
+                    confirmPopup(overwriteConfirm); 
                 } else if (result.result === "success") {
-                    this.setSaveMsg(true, result.file);
+                    //this.setSaveMsg(true, result.file);
+                    this.toastBL.show({severity:'success', summary: '저장 성공', detail:result.file, life: 3000});
                 } else {
-                    this.setSaveMsg(false, result.errormsg);
+                    //this.setSaveMsg(false, result.errormsg);
+                    this.toastBL.show({severity:'error', summary: '저장 실패', detail:result.errormsg, life: 3000});
                 }
             },
             (error) => {
-                this.setSaveMsg(false, error);
+                //this.setSaveMsg(false, error);
+                this.toastBL.show({severity:'error', summary: '저장 실패', detail:error, life: 3000});
             }
         )
     }
@@ -324,10 +287,6 @@ export default class EquipManage extends Component {
                     }
                 }       
             }
-
-            //json.CommSpec = CommSpec.getCommSpec(this.state.class, this.state.type, this.state.subtype);
-            //if (this.state.commSpec !== null)
-            //    json.CommSpec = this.state.commSpec;
             if (this.csCmpRef && this.csCmpRef.current) {
                 var cs = this.csCmpRef.current.getCommSpec();
                 if (cs)
@@ -352,9 +311,6 @@ export default class EquipManage extends Component {
     }
     
     render() {
-
-        var itemKey = 0;
-
         return (
             <>
                 <DeviceSpecPopup 
@@ -362,260 +318,139 @@ export default class EquipManage extends Component {
                     show={this.state.showFiles} modify={true}
                     onModify={this.onModify}
                     onAddDevice={this.onAddDevice}></DeviceSpecPopup>
-                <Container fluid style={{margin:"10px"}}>
-                <Row style={{marginBottom:"20px", marginLeft:"10px"}}>
-                    <Button variant="secondary" size="sm" style={{width:"200px"}}
-                        onClick={this.onShowFiles}>장비 규격 파일 검색</Button>
-                </Row>
-                <Row>
-                <Col>
-                    <Row style={{marginBottom:"10px"}}>
-                        <Col style={{width:"120px"}} xs="auto">
-                            Class
-                        </Col>
-                        <Col xs="auto">
-                            <Dropdown onSelect={(eventKey, event) => {
-                                if (this.state.class !== eventKey) {
-                                    this.setState({type:null, subtype:null, valueunit:null, addDeviceList:{}, commSpec:null}, () => {
-                                        this.csCmpRef.current.setCommSpec(null);
-                                        this.dvcPopRef.current.setClass(this.state.class);
-                                    });
-                                }
-
-                                this.setState({class:eventKey});
-                            }}>
-                                <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                                    {this.state.class == null ? 'Class' : this.state.class}
-                                </Dropdown.Toggle>
-
-                                <Dropdown.Menu>
-                                    { Data.deviceClasses.map(cls => (
-                                        <Dropdown.Item key={itemKey++} eventKey={cls}>{cls}</Dropdown.Item>
-                                    )) }
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </Col>
-                    </Row>
-
-                    <Row style={{marginBottom:"10px"}}>
-                        <Col xs="auto" style={{width:"120px"}}>
-                            Type
-                        </Col>
-                        <Col xs="auto">
-                            <Dropdown onSelect={(eventKey, event) => {
-                                this.csCmpRef.current.setCommSpec(null);
-                                this.setState({type:eventKey});
-                            }}>
-                                <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                                    {this.state.type == null ? 'Type' : this.state.type }
-                                </Dropdown.Toggle>
-
-                                <Dropdown.Menu>
-                                    { Data.getDeviceTypes(this.state.class).map(type => (
-                                        <Dropdown.Item key={itemKey++} eventKey={type}>{type}</Dropdown.Item>
-                                    )) }
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </Col>
-                        <Col xs="auto">
-                            <Dropdown onSelect={(eventKey, event) => {
-                                this.csCmpRef.current.setCommSpec(null);
-                                this.setState({subtype:eventKey});
-                            }}>
-                                <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                                    {this.state.subtype == null ? 'SubType' : this.state.subtype }
-                                </Dropdown.Toggle>
-
-                                <Dropdown.Menu>
-                                    { Data.getDeviceSubTypes(this.state.type).map(subtype => (
-                                        <Dropdown.Item key={itemKey++} eventKey={subtype}>{subtype}</Dropdown.Item>
-                                    )) }
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </Col>
-                    </Row>
-
-                    <Row style={{marginBottom:"10px"}}>
-                        <Col xs="auto" style={{width:"120px"}}>
-                            Model
-                        </Col>
-                        <Col xs="auto">
-                            <input id="modelInput" onKeyUp={this.setModel} ></input>
-                        </Col>
-                    </Row>
-
-                    <Row style={{marginBottom:"10px"}}>
-                        <Col xs="auto" style={{width:"120px"}}>
-                            Name
-                        </Col>
-                        <Col xs="auto">
-                            <input id="nameInput" onKeyUp={this.setName} ></input>
-                        </Col>
-                    </Row>
-                    { this.isSensor() && 
-                    <Row style={{marginBottom:"10px"}}>
-                        <Col style={{width:"120px"}} xs="auto">
-                            ValueUnit
-                        </Col>
-                        <Col xs="auto">
-                            <Dropdown onSelect={(eventKey, event) => {
-                                if (eventKey === 'etc' && this.state.valueunit !== 'etc')
-                                    this.setState({valueunitetc:null});
-
-                                this.setState({valueunit:eventKey});
-                            }}>
-                                <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                                    {this.state.valueunit == null ? 'ValueUnit' : this.state.valueunit}
-                                </Dropdown.Toggle>
-
-                                <Dropdown.Menu>
-                                    { Data.valueUnit.map(cls => (
-                                        <Dropdown.Item key={itemKey++} eventKey={cls}>{cls}</Dropdown.Item>
-                                    )) }
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </Col>
-                        { this.state.valueunit === 'etc' &&
-                            <Col xs="auto">
-                                <input id="valueUnitInput" onKeyUp={this.setValueUnitEtc} ></input>
-                            </Col>
-                        }
-                    </Row> }
-                    { this.isSensor() && 
-                    <Row style={{marginBottom:"10px"}}>
-                        <Col style={{width:"120px"}} xs="auto">
-                            SignificantDigit
-                        </Col>
-                        <Col xs="auto">
-                            <Dropdown onSelect={(eventKey, event) => {
-                                this.setState({sd:eventKey});
-                            }}>
-                                <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                                    {this.state.sd == null ? 'SD' : this.state.sd}
-                                </Dropdown.Toggle>
-
-                                <Dropdown.Menu>
-                                    { Data.sd.map(cls => (
-                                        <Dropdown.Item key={itemKey++} eventKey={cls}>{cls}</Dropdown.Item>
-                                    )) }
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </Col>
-                    </Row> }
-                    { this.state.class !== 'node' && 
-                    <Row style={{marginBottom:"10px"}}>
-                        <Col xs="auto" style={{width:"120px"}}>
-                            Channel
-                        </Col>
-                        <Col xs="auto">
-                            <input id="channelInput" onKeyUp={this.setChannel}></input>
-                        </Col>
-                    </Row> }
-                    
-                    <Row style={{marginBottom:"10px"}}>
-                        <CommSpecComponent 
-                            ref={this.csCmpRef} 
-                            cls={this.state.class} type={this.state.type} subtype={this.state.subtype} onChanged={this.onCommSpecChange}>
-                        </CommSpecComponent>
-                    </Row>
-                    
-                    { this.state.class === 'node' && 
-                    <Row style={{marginBottom:"10px"}}>
-                        <Button variant="secondary" size="sm" style={{width:"200px"}}
-                        onClick={this.onShowFiles}>Device 추가</Button>
-                    </Row>
-                    }
-                    { this.state.class === 'node' && Object.keys(this.state.addDeviceList).length > 0 &&
-                        /*<>
-                        {Object.keys(this.state.addDeviceList).map((key, idx) => (
-                            <Row key={idx}>
-                                <Alert variant="secondary" dismissible onClose={()=> this.onRemoveFromDeviceList(key)}>{key}</Alert>
-                            </Row>
-                        ))}
-                        </>*/
-                        <div className="heightDevice">
-                        {Object.keys(this.state.addDeviceList).map((key, idx) => (
-                            <div key={idx}><div style={{width:"300px", height:"33px", border:"1px solid gray", background:"#e2e2e2", borderRadius:"4px", paddingLeft:"5px", marginBottom:"-20px"}}>
-                                <p style={{width:"200px", display:"inline", verticalAlign:"middle"}}>{key}</p>
-                                <Button style={{float:"right"}} size="sm" variant="danger" onClick={()=> this.onRemoveFromDeviceList(key)}>X</Button>
-                            </div><br/></div>
-                        ))}
+                <div className="p-grid p-justify-between">
+                    <div className="p-col-fixed" style={{width:"250px"}}>
+                        <Button className="p-button-secondary" label="장비 규격 파일 검색" style={{width:"200px", margin:"10px 10px 10px 20px"}}
+                            onClick={this.onShowFiles}></Button>
+                    </div>
+                    <div className="p-col-fixed" style={{width:"500px", marginTop:"10px", marginRight:"20px"}}>
+                        <div className="p-inputgroup">
+                            <span className="p-inputgroup-addon" style={{width:"130px"}}>장비 규격 이름</span>
+                            <InputText id="deviceSpecNameInput" onKeyUp={this.setDeviceSpecName} ></InputText>
+                            <Button className="p-button-secondary" label="저장" style={{width:"100px"}}
+                                onClick={this.saveClick}></Button>
                         </div>
-                    }
-                </Col>
-
-                
-                <Col style={{borderLeft:"5px solid gray"}}>
-                    <pre className="heightLine">
-                        <code>
-                            {JSON.stringify(this.getJson(), null, 4)}
-                        </code>
-                    </pre>
-                </Col>
-                </Row>
-                {/*<Row style={{marginTop:"10px"}}>
-                    {this.state.saveAlert && 
-                        <Alert variant={ this.state.saveResult ? "success" : "danger" } onClose={() => this.setState({saveAlert:false})} dismissible>
-                            <Alert.Heading>{ this.state.saveResult ? "파일 저장 성공!" : "파일 저장 실패!" }</Alert.Heading>
-                            {this.state.saveErrorMessage && <p>{this.state.saveErrorMessage}</p>}
-                            {this.state.overwriteMessage && 
-                                <>
-                                    <p>동일한 이름의 장비 규격 파일이 있습니다. 덮어쓰시겠습니까?</p>
-                                    <hr/>
-                                    <div className="d-flex justify-content-end">
-                                        <Button style={{marginRight:"10px"}} onClick={this.overwriteClick} variant="outline-success">
-                                            예
-                                        </Button>
-                                        <Button onClick={() => {
-                                            this.state.overwriteMessage = false;
-                                            this.setState({saveAlert:false});
-                                            }} variant="outline-danger">
-                                            아니요
-                                        </Button>
-                                    </div>
-                                </>
-                            }
-                        </Alert>
-                    }
-                </Row>*/}
-                <Row style={{marginTop:"10px"}}>
-                    <Col xs="auto" style={{width:"130px"}}>
-                        장비 규격 이름
-                    </Col>
-                    <Col xs="auto">
-                        <input style={{width:"400px"}} id="deviceSpecNameInput" onKeyUp={this.setDeviceSpecName}></input>
-                    </Col>
-                    <Col xs="auto">
-                        <Button variant="secondary" size="sm" style={{width:"100px"}}
-                        onClick={this.saveClick}>저장</Button>
-                    </Col>
-                </Row>
-            </Container>
-            {this.state.saveAlert && 
-                <div style={{position:"absolute", bottom:"70px", left:"10px", opacity:"0.95"}}>
-                <Alert variant={ this.state.saveResult ? "success" : "danger" } onClose={() => this.setState({saveAlert:false})} dismissible>
-                    <Alert.Heading>{ this.state.saveResult ? "파일 저장 성공!" : "파일 저장 실패!" }</Alert.Heading>
-                    {this.state.saveErrorMessage && <p>{this.state.saveErrorMessage}</p>}
-                    {this.state.overwriteMessage && 
-                        <>
-                            <p>동일한 이름의 장비 규격 파일이 있습니다. 덮어쓰시겠습니까?</p>
-                            <hr/>
-                            <div className="d-flex justify-content-end">
-                                <Button style={{marginRight:"10px"}} onClick={this.overwriteClick} variant="outline-success">
-                                    예
-                                </Button>
-                                <Button onClick={() => {
-                                    //this.state.overwriteMessage = false;
-                                    this.setState({saveAlert:false, overwriteMessage:false});
-                                    }} variant="outline-danger">
-                                    아니요
-                                </Button>
-                            </div>
-                        </>
-                    }
-                </Alert>
+                    </div>
                 </div>
-            }
+                <div className="p-grid">
+                    <div className="p-col-fixed" style={{width:"450px",paddingRight:"0px"}}>
+                        <Panel header="SPEC" style={{marginLeft:"10px"}}>
+                        <div className="heightLine">
+                            <span className="p-float-label" style={{marginTop:"20px"}}>
+                                <Dropdown style={{width:"225px"}} value={this.state.class} options={Data.deviceClasses} onChange={(e) =>{
+                                    if (this.state.class !== e.value) {
+                                        this.setState({type:null, subtype:null, valueunit:null, addDeviceList:{}, commSpec:null}, () => {
+                                            this.csCmpRef.current.setCommSpec(null);
+                                            this.dvcPopRef.current.setClass(this.state.class);
+                                        });
+                                    }
+
+                                    this.setState({class:e.value});
+                                }}></Dropdown>
+                                <label htmlFor="dropdown">Class</label>
+                            </span>
+                            <div className="p-grid" style={{marginTop:"20px"}}>
+                                <div className="p-col-fixed" style={{width:"230px"}}>
+                                    <span className="p-float-label">
+                                        <Dropdown value={this.state.type} options={Data.getDeviceTypes(this.state.class)} onChange={(e) =>{
+                                            this.csCmpRef.current.setCommSpec(null);
+                                            this.setState({type:e.value, subtype:null, addDeviceList:{}}, () => {
+                                                if (this.state.class == 'sensor') {
+                                                    this.setState({valueunit:Data.getValueUnit4Type(e.value)});
+                                                }
+                                            });
+                                        }}></Dropdown>
+                                        <label htmlFor="dropdown">Type</label>
+                                    </span>
+                                </div>
+                                <div className="p-col">
+                                    <span className="p-float-label">
+                                        <Dropdown style={{width:"150px"}} value={this.state.subtype} options={Data.getDeviceSubTypes(this.state.type)} onChange={(e) =>{
+                                            this.csCmpRef.current.setCommSpec(null);
+                                            this.setState({subtype:e.value});
+                                        }}></Dropdown>
+                                        <label htmlFor="dropdown">SubType</label>
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="p-inputgroup" style={{marginTop:"20px",width:"380px"}}>
+                                <span className="p-inputgroup-addon" style={{width:"130px"}}>Model</span>
+                                <InputText id="modelInput" onKeyUp={this.setModel} placeholder="제품의 모델 번호 (영문과 숫자의 조합)"></InputText>
+                            </div>
+                            <div className="p-inputgroup" style={{marginTop:"10px",width:"380px"}}>
+                                <span className="p-inputgroup-addon" style={{width:"130px"}}>Name</span>
+                                <InputText id="nameInput" onKeyUp={this.setName} placeholder="모델명 (문자열)"></InputText>
+                            </div>
+                            {
+                                this.isSensor() && 
+                                <div>
+                                    <div className="p-inputgroup" style={{marginTop:"10px",width:"380px"}}>
+                                        <span className="p-inputgroup-addon" style={{width:"130px"}}>ValueUnit</span>
+                                        <Dropdown style={{width:"50px"}} value={this.state.valueunit} options={Data.valueUnit} optionLabel="name" optionValue="value" onChange={(e) =>{
+                                            if (e.value === 'etc' && this.state.valueunit !== 'etc') {
+                                                this.setState({valueunitetc:null});
+                                            }
+
+                                            this.setState({valueunit:e.value});
+                                        }}></Dropdown>
+                                        {
+                                            this.state.valueunit === 'etc' &&
+                                            <InputText id="valueUnitInput" onKeyUp={this.setValueUnitEtc} ></InputText>
+                                        }
+                                    </div>
+                                    <div className="p-inputgroup" style={{marginTop:"10px",width:"380px"}}>
+                                        <span className="p-inputgroup-addon" style={{width:"130px"}}>SignificantDigit</span>
+                                        <Dropdown style={{width:"50px"}} value={this.state.sd} options={Data.sd} onChange={(e) =>{
+                                            this.setState({sd:e.value});
+                                        }}></Dropdown>
+                                    </div>
+                                </div>
+                            }
+                            {
+                                this.state.class !== 'node' && 
+                                <div className="p-inputgroup" style={{marginTop:"10px",width:"380px"}}>
+                                    <span className="p-inputgroup-addon" style={{width:"130px"}}>Channel</span>
+                                    <InputText id="channelInput" onKeyUp={this.setChannel} ></InputText>
+                                </div>
+                            }
+                            <div style={{marginTop:"20px", padding:"0px", width:"380px"}}>
+                                <CommSpecComponent 
+                                    ref={this.csCmpRef} 
+                                    cls={this.state.class} type={this.state.type} subtype={this.state.subtype} onChanged={this.onCommSpecChange}>
+                                </CommSpecComponent>
+                            </div>
+                            {
+                                this.state.class === 'node' && 
+                                <Button className="p-button-secondary" label="Device 추가" style={{width:"130px", height:"30px", marginTop:"20px"}}
+                                    onClick={this.onShowFiles}></Button>
+                            }
+                            {
+                                this.state.class === 'node' && Object.keys(this.state.addDeviceList).length > 0 &&
+                                <div>
+                                    {Object.keys(this.state.addDeviceList).map((key, idx) => (
+                                        <div  key={idx} className="p-inputgroup" style={{height:"33px",marginTop:"5px"}}>
+                                            <span className="p-inputgroup-addon" style={{width:"345px"}}>{key}</span>
+                                            <Button className="p-button-danger" icon="pi pi-times" onClick={()=> this.onRemoveFromDeviceList(key)}/>
+                                        </div>
+                                    ))}
+                                </div>
+                            }
+                        </div>
+                        </Panel>
+                    </div>
+                    <div className="p-col" style={{}}>
+                        <Panel header="JSON" style={{marginRight:"10px"}}>
+                            <div className="heightLine" style={{marginBottom:"0px"}}>
+                                <pre style={{marginRight:"10px",fontSize:"13px"}}>
+                                    
+                                        {JSON.stringify(this.getJson(), null, 4)}
+                                    
+                                </pre>
+                            </div>
+                        </Panel>
+                    </div>
+                </div>
+                <Toast ref={(el) => this.toastBL = el} position="top-right" />
             </>            
         );
     }

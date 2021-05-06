@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
-import { Container, Row, Col, Button, Alert } from 'react-bootstrap';
 import DeviceSpecPopup from './DeviceSpecPopup'
 import TestSpecPopup from './TestSpecPopup'
 import TestSpecListPopup from './TestSpecListPopup'
 import TestSpec from './TestSpec'
-import './SequenceManage.css'
 import ExcuteTest from "./ExcuteTest";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext';
+import { Button } from 'primereact/button';
+import { confirmPopup } from 'primereact/confirmpopup';
+import { Toast } from 'primereact/toast';
+import './SequenceManage.css'
 
 export default class SequenceManage extends Component {
     state = {
@@ -19,11 +21,11 @@ export default class SequenceManage extends Component {
         showCreate : false,
         showTest : false,
         tests : [],
-        saveAlert : false,
-        saveResult : false,
+        //saveAlert : false,
+        //saveResult : false,
         overwrite : false,
-        saveErrorMessage : null,
-        overwriteMessage : null,
+        //saveErrorMessage : null,
+        //overwriteMessage : null,
         rowSelected : null
     }
 
@@ -62,6 +64,7 @@ export default class SequenceManage extends Component {
         datas.map((test,id) => {
             if (test.trim().length > 0)
                 tests.push({id:id,test:test});
+            return test;
         });
 
         document.getElementById('testSpecNameInput').value = name;
@@ -72,7 +75,8 @@ export default class SequenceManage extends Component {
     onCreateTest = () => {
 
         if (this.state.loadFile === null) {
-            alert('장비 규격 파일을 불러와야 합니다.');
+            //alert('장비 규격 파일을 불러와야 합니다.');
+            this.toastTL.show({severity:'error', summary: 'Error', detail:'장비 규격 파일을 불러와야 합니다.', life: 3000});
             return;
         }
 
@@ -82,12 +86,12 @@ export default class SequenceManage extends Component {
         });
     }
 
-    setSaveMsg = (result, msg) => {
+    /*setSaveMsg = (result, msg) => {
         this.setState({saveResult:result, saveErrorMessage:msg, saveAlert:true});
-    }
+    }*/
 
     overwriteClick = () => {
-        this.setState({overwrite:true, overwriteMessage:false, saveAlert:false}, () => {
+        this.setState({overwrite:true/*, overwriteMessage:false, saveAlert:false*/}, () => {
             this.saveClick();
             this.setState({overwrite:false});
         });
@@ -106,19 +110,31 @@ export default class SequenceManage extends Component {
         return this.state.tests;
     }
 
-    saveClick = () => {
+    saveClick = (event) => {
         var testSpecName = document.getElementById('testSpecNameInput').value;
         if (!testSpecName) {
-            this.setSaveMsg(false, '시험파일 이름을 입력하세요.');
+            //this.setSaveMsg(false, '시험파일 이름을 입력하세요.');
+            this.toastBL.show({severity:'error', summary: 'Error', detail:'시험파일 이름을 입력하세요.', life: 3000});
             return;
         }
 
         let testSpec = this.getTestSpec();
 
         if (!testSpec || testSpec.length <= 0) {
-            this.setSaveMsg(false, '저장할 시험파일 내용이 없습니다.');
+            //this.setSaveMsg(false, '저장할 시험파일 내용이 없습니다.');
+            this.toastBL.show({severity:'error', summary: 'Error', detail:'저장할 시험파일 내용이 없습니다.', life: 3000});
             return;
         }
+
+        let overwriteConfirm = {
+            target: event ? event.currentTarget : null,
+            message: '동일한 이름의 시험 파일이 있습니다. 덮어쓰시겠습니까?',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel:'예',
+            rejectLabel:'아니오',
+            accept: this.overwriteClick,
+            reject: null
+        };
 
         fetch("/testspec", {
             body: JSON.stringify({
@@ -133,18 +149,23 @@ export default class SequenceManage extends Component {
         .then(
             (result) => {
                 if (result.result === "error") {
-                    this.setSaveMsg(false, result.errormsg);
+                    //this.setSaveMsg(false, result.errormsg);
+                    this.toastBL.show({severity:'error', summary: 'Error', detail:result.errormsg, life: 3000});
                 } else if (result.result === "duplicate") {
-                    this.state.overwriteMessage = true;
-                    this.setSaveMsg(false, null);
+                    //this.state.overwriteMessage = true;
+                    //this.setSaveMsg(false, null);
+                    confirmPopup(overwriteConfirm);
                 } else if (result.result === "success") {
-                    this.setSaveMsg(true, result.file);
+                    //this.setSaveMsg(true, result.file);
+                    this.toastBL.show({severity:'success', summary: '저장 성공', detail:result.file, life: 3000});
                 } else {
-                    this.setSaveMsg(false, result.errormsg);
+                    //this.setSaveMsg(false, result.errormsg);
+                    this.toastBL.show({severity:'error', summary: 'Error', detail:result.errormsg, life: 3000});
                 }
             },
             (error) => {
-                this.setSaveMsg(false, error);
+                //this.setSaveMsg(false, error);
+                this.toastBL.show({severity:'error', summary: 'Error', detail:error, life: 3000});
             }
         )
     }
@@ -196,14 +217,16 @@ export default class SequenceManage extends Component {
 
     testClick = () => {
         if (this.state.loadFile === null) {
-            alert('장비 규격 파일을 불러와야 합니다.');
+            //alert('장비 규격 파일을 불러와야 합니다.');
+            this.toastBR.show({severity:'error', summary: 'Error', detail:'장비 규격 파일을 불러와야 합니다.', life: 3000});
             return;
         }
 
         let testSpec = this.getTestSpec();
 
         if (!testSpec || testSpec.length <= 0) {
-            alert('시험할 내용이 없습니다.');
+            //alert('시험할 내용이 없습니다.');
+            this.toastBR.show({severity:'error', summary: 'Error', detail:'시험할 내용이 없습니다.', life: 3000});
             return;
         }
 
@@ -225,13 +248,15 @@ export default class SequenceManage extends Component {
 
             this.state.rowSelected.map((item) => {
                 mvid.push(item.id);
+                return item;
             });
 
             this.state.tests.map((item) => {
-               if (mvid.indexOf(item.id) >= 0) {
-                   mvitem.push({id:item.id, test:String(item.test)});
-                   item.test = '!@!@!';
-               }
+                if (mvid.indexOf(item.id) >= 0) {
+                    mvitem.push({id:item.id, test:String(item.test)});
+                    item.test = '!@!@!';
+                }
+                return item;
             });
 
             for(let i=mvitem.length - 1; i>=0; i--) {
@@ -256,6 +281,7 @@ export default class SequenceManage extends Component {
 
         this.state.rowSelected.map((item) => {
             mvid.push(item.id);
+            return item;
         });
 
         let idx = this.state.tests.length;
@@ -264,10 +290,12 @@ export default class SequenceManage extends Component {
             if (mvid.indexOf(item.id) >= 0) {
                 mvitem.push({id:idx++, test:String(item.test)});
             }
+            return item;
         });
 
         mvitem.map((item) => {
-           this.state.tests.push(item);
+            this.state.tests.push(item);
+            return item;
         });
 
         this.setState({tests:this.state.tests});
@@ -290,16 +318,14 @@ export default class SequenceManage extends Component {
     onSelectDelete = () => {
         if (this.state.rowSelected == null || this.state.rowSelected.length <= 0) return;
 
-        let mvid = [];
-        let mvitem = [];
-
         this.state.rowSelected.map((item) => {
             for(let i=this.state.tests.length - 1; i>=0; i--) {
-                if (this.state.tests[i].id == item.id) {
+                if (this.state.tests[i].id === item.id) {
                     this.state.tests.splice(i, 1);
                     break;
                 }
             }
+            return item;
         });
 
         this.setState({tests:this.state.tests});
@@ -334,100 +360,70 @@ export default class SequenceManage extends Component {
                 <TestSpecPopup
                     ref={this.testPopRef}
                     show={this.state.showCreate} onCreate={this.onCreate}></TestSpecPopup>
-                <Container fluid style={{margin:"10px"}}>
-                    <Row style={{margin:"10px"}}>
-                        <Col xs="auto">
-                            <Button variant="secondary" size="sm" style={{width:"200px"}}
-                                onClick={this.onShowFiles}>장비 규격 파일 불러오기</Button>
-                        </Col>
-                        <Col xs="auto">
-                            <Button variant="secondary" size="sm" style={{width:"200px"}}
-                                onClick={this.onShowTestFiles}>시험 파일 불러오기</Button>
-                        </Col>
-                        <Col>
-                            {this.state.loadFile}
-                        </Col>
-                    </Row>
-                    <Row>
-                        <TestSpec
-                            ref={this.testRef} onCreate={this.onCreate}
-                        ></TestSpec>
-                    </Row>
-                    <Row style={{margin:"10px"}}>
-                        <Col xs="auto">
-                            <Button variant="secondary" size="sm" style={{width:"200px"}}
-                                onClick={this.onCreateTest}>예외요청 생성</Button>
-                        </Col>
-                        <Col xs="auto">
-                            <Button variant="secondary" size="sm" style={{width:"200px"}}
-                                    onClick={this.onSelectCopy}>선택항목 복사</Button>
-                        </Col>
-                        {/*<Col xs="auto">
-                            <Button variant="secondary" size="sm" style={{width:"200px"}}
-                                    onClick={this.onSelectEdit}>선택항목 수정</Button>
-                        </Col>*/}
-                        <Col xs="auto">
-                            <Button variant="secondary" size="sm" style={{width:"200px"}}
-                                    onClick={this.onSelectDelete}>선택항목 삭제</Button>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <div className="grid">
-                            <DataTable value={this.state.tests} editMode="cell" className="p-datatable-sm editable-cells-table"
-                                       onRowReorder={this.onRowReorder}
-                                       selectionMode="multiple" dataKey="id" selection={this.state.rowSelected} onSelectionChange={e => this.setState({rowSelected:e.value})}>
-                                <Column rowReorder style={{width:'3em'}}></Column>
-                                <Column key='id' columnKey='test' field='test' editor={(props) => this.testEditor(props)}></Column>
-                            </DataTable>
-                            {/*this.state.tests.map((test, idx) => (
-                                <div className="testitem" key={idx}>
-                                    <p>{test}</p>
-                                </div>
-                            ))*/}
-                        </div>
-                    </Row>
-                    <Row style={{marginTop:"10px"}}>
-                        <Col xs="auto" style={{width:"130px"}}>
-                            시험파일 이름
-                        </Col>
-                        <Col xs="auto">
-                            <input style={{width:"400px"}} id="testSpecNameInput"></input>
-                        </Col>
-                        <Col xs="auto">
-                            <Button variant="secondary" size="sm" style={{width:"100px"}}
-                            onClick={this.saveClick}>저장</Button>
-                        </Col>
-                        <Col xs="auto">
-                            <Button variant="secondary" size="sm" style={{width:"100px"}}
-                                    onClick={this.testClick}>장비 시험</Button>
-                        </Col>
-                    </Row>
-                </Container>
-                {this.state.saveAlert && 
-                <div style={{position:"absolute", bottom:"50px", left:"10px", opacity:"0.95"}}>
-                <Alert variant={ this.state.saveResult ? "success" : "danger" } onClose={() => this.setState({saveAlert:false})} dismissible>
-                    <Alert.Heading>{ this.state.saveResult ? "파일 저장 성공!" : "파일 저장 실패!" }</Alert.Heading>
-                    {this.state.saveErrorMessage && <p>{this.state.saveErrorMessage}</p>}
-                    {this.state.overwriteMessage && 
-                        <>
-                            <p>동일한 이름의 장비 규격 파일이 있습니다. 덮어쓰시겠습니까?</p>
-                            <hr/>
-                            <div className="d-flex justify-content-end">
-                                <Button style={{marginRight:"10px"}} onClick={this.overwriteClick} variant="outline-success">
-                                    예
-                                </Button>
-                                <Button onClick={() => {
-                                    //this.state.overwriteMessage = false;
-                                    this.setState({saveAlert:false, overwriteMessage:false});
-                                    }} variant="outline-danger">
-                                    아니요
-                                </Button>
+                <div style={{backgroundColor:'#f8f9fa'}}>
+                    <div className="p-grid">
+                        <div className="p-col-fixed" style={{width:"600px",marginLeft:"10px",marginTop:"10px"}}>
+                            <div className="p-inputgroup">
+                                <Button className="p-button-secondary" label="장비 규격 파일 불러오기" style={{width:"200px"}}
+                                    onClick={this.onShowFiles}></Button>
+                                <span className="p-inputgroup-addon" style={{width:"400px"}}>{this.state.loadFile}</span>
                             </div>
-                        </>
-                    }
-                </Alert>
+                        </div>
+                    </div>
+                    <div className="card" style={{margin:"10px",padding:"10px"}}>
+                        <TestSpec
+                                ref={this.testRef} onCreate={this.onCreate}
+                        ></TestSpec>
+                    </div>
+                    <div className="p-grid p-justify-start" style={{margin:"10px"}}>
+                        <div className="p-col-fixed" style={{width:"250px"}}>
+                            <Button className="p-button-secondary" label="시험 파일 불러오기" style={{width:"200px"}}
+                                onClick={this.onShowTestFiles}></Button>
+                        </div>
+                        <div className="p-col-fixed" style={{width:"250px"}}>
+                            <Button className="p-button-secondary" label="예외요청 생성" style={{width:"200px"}}
+                                onClick={this.onCreateTest}></Button>
+                        </div>
+                        <div className="p-col-fixed" style={{width:"250px"}}>
+                            <Button className="p-button-secondary" label="선택항목 복사" style={{width:"200px"}}
+                                onClick={this.onSelectCopy}></Button>
+                        </div>
+                        <div className="p-col-fixed" style={{width:"250px"}}>
+                            <Button className="p-button-secondary" label="선택항목 삭제" style={{width:"200px"}}
+                                onClick={this.onSelectDelete}></Button>
+                        </div>
+                    </div>
+                    <div className="grid">
+                        <DataTable value={this.state.tests} editMode="cell" className="p-datatable-sm editable-cells-table"
+                            onRowReorder={this.onRowReorder}
+                            selectionMode="multiple" dataKey="id" selection={this.state.rowSelected} onSelectionChange={e => this.setState({rowSelected:e.value})}>
+                            <Column rowReorder style={{width:'3em'}}></Column>
+                            <Column key='id' columnKey='test' field='test' editor={(props) => this.testEditor(props)}></Column>
+                        </DataTable>
+                        {/*this.state.tests.map((test, idx) => (
+                            <div className="testitem" key={idx}>
+                                <p>{test}</p>
+                            </div>
+                        ))*/}
+                    </div>
+                    <div className="p-grid p-justify-between" style={{margin:"10px"}}>
+                        <div className="p-col-fixed" style={{width:"500px"}}>
+                            <div className="p-inputgroup">
+                                <span className="p-inputgroup-addon" style={{width:"130px"}}>시험 파일 이름</span>
+                                <InputText id="testSpecNameInput" onKeyUp={this.setDeviceSpecName} ></InputText>
+                                <Button className="p-button-secondary" label="저장" style={{width:"100px"}}
+                                    onClick={this.saveClick}></Button>
+                            </div>
+                        </div>
+                        <div className="p-col-fixed" style={{width:"120px"}}>
+                            <Button className="p-button-secondary" label="장비 시험" 
+                                onClick={this.testClick}></Button>
+                        </div>
+                    </div>
                 </div>
-            }
+                <Toast ref={(el) => this.toastTL = el} position="top-left" />
+                <Toast ref={(el) => this.toastBL = el} position="bottom-left" />
+                <Toast ref={(el) => this.toastBR = el} position="bottom-right" />
             </>
         );
     }

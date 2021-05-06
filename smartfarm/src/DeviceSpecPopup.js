@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { Container, Row, Col, Button, Alert } from 'react-bootstrap';
 import NewWindow from 'react-new-window';
 import { saveAs } from 'file-saver';
 import { FileUpload } from 'primereact/fileupload';
+import { Button } from 'primereact/button';
+import { Toast } from 'primereact/toast';
+import { Panel } from 'primereact/panel';
 
 export default class DeviceSpecPopup extends Component {
     state = {
@@ -87,7 +89,8 @@ export default class DeviceSpecPopup extends Component {
     onAddDevice = () => {
 
         if (this.state.selectFile == null || this.state.fileJson == null) {
-            this.setState({addDeviceMessage:"추가할 장비 규격 파일을 선택하세요."});
+            //this.setState({addDeviceMessage:"추가할 장비 규격 파일을 선택하세요."});
+            this.toastBL.show({severity:'error', detail:"추가할 장비 규격 파일을 선택하세요.", life: 3000});
             return;
         }
 
@@ -100,7 +103,8 @@ export default class DeviceSpecPopup extends Component {
     onRemoveFile = () =>{
         
         if (this.state.selectFile == null) {
-            this.setState({addDeviceMessage:"삭제할 장비 규격 파일을 선택하세요."});
+            //this.setState({addDeviceMessage:"삭제할 장비 규격 파일을 선택하세요."});
+            this.toastBL.show({severity:'error', detail:"삭제할 장비 규격 파일을 선택하세요.", life: 3000});
             return;
         }
 
@@ -126,7 +130,8 @@ export default class DeviceSpecPopup extends Component {
 
     onModify = () => {
         if (this.state.selectFile == null || this.state.fileJson == null) {
-            this.setState({addDeviceMessage:"수정할 장비 규격 파일을 선택하세요."});
+            //this.setState({addDeviceMessage:"수정할 장비 규격 파일을 선택하세요."});
+            this.toastBL.show({severity:'error', detail:"수정할 장비 규격 파일을 선택하세요.", life: 3000});
             return;
         }
 
@@ -138,7 +143,8 @@ export default class DeviceSpecPopup extends Component {
 
     onLoad = () => {
         if (this.state.selectFile == null || this.state.fileJson == null) {
-            this.setState({addDeviceMessage:"불러올 장비 규격 파일을 선택하세요."});
+            //this.setState({addDeviceMessage:"불러올 장비 규격 파일을 선택하세요."});
+            this.toastBL.show({severity:'error', detail:"불러올 장비 규격 파일을 선택하세요.", life: 3000});
             return;
         }
 
@@ -147,8 +153,9 @@ export default class DeviceSpecPopup extends Component {
 
     onDownload = () => {
         if (!this.state.fileJson || this.state.fileJson.length < 0) {
-            this.setState({addDeviceMessage:"다운로드할 장비 규격 파일을 선택하세요."});
-            console.log(this.state.errorMsg);
+            //this.setState({addDeviceMessage:"다운로드할 장비 규격 파일을 선택하세요."});
+            this.toastBL.show({severity:'error', detail:"다운로드할 장비 규격 파일을 선택하세요.", life: 3000});
+            //console.log(this.state.errorMsg);
             return;
         }
 
@@ -158,12 +165,13 @@ export default class DeviceSpecPopup extends Component {
 
     onUpload = () => {
         this.setState({errorMsg:false}, () => {
-            console.log(this.state.errorMsg);
-            this.setState({errorMsg:false,addDeviceMessage:"업로드 성공!"}, () => {
-                console.log(this.state.errorMsg);
-                this.getFiles();
-                this.setState({errorMsg:true});
-            });
+            //console.log(this.state.errorMsg);
+            //this.setState({errorMsg:false,addDeviceMessage:"업로드 성공!"}, () => {
+            //    console.log(this.state.errorMsg);
+            this.toastBL.show({severity:'success', detail:"업로드 성공!", life: 3000});
+            this.getFiles();
+            //this.setState({errorMsg:true});
+            //});
         });
     }
 
@@ -174,70 +182,78 @@ export default class DeviceSpecPopup extends Component {
                 {this.props.show &&
                 <NewWindow onUnload={this.onFilesUnload} center={"parent"} title={"장비 규격 파일 불러오기"} features={{width:800, height:800}}>
                     <div >
-                    <Container fluid style={{margin:"10px"}}>
-                        <Row style={{marginLeft:"10px", marginBottom:"10px"}}>
-                            <Col></Col>
-                            <Col xs="auto">
-                                <Button variant="secondary" size="sm" style={{width:"100px"}}
-                                    onClick={this.getFiles}>새로고침</Button>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col>
-                                { this.state.files && this.state.files.length > 0 ?
+                        <div className="p-grid p-justify-end">
+                            <div className="p-col-2" style={{margin:"5px",marginRight:"10px"}}>
+                                <Button className="p-button-secondary" label="새로고침" style={{width:"100%"}}
+                                    onClick={this.getFiles}></Button>
+                            </div>
+                        </div>
+                        <div className="p-grid">
+                            <div className="p-col-fixed" style={{width:"340px",paddingRight:"0px"}}>
+                                <Panel header="FILE" style={{marginLeft:"10px"}}>
+                                {
+                                    this.state.files && this.state.files.length > 0 ?
                                     <div className="heightPopup">
                                         {this.state.files.map((file, idx) => 
-                                        <div key={idx}><Button key={idx + "dvcspc"} variant={this.state.selectFile === file ? "primary" : "outline-secondary"} style={{minWidth:"300px", textAlign:"start", marginBottom:"1px"}} onClick={() => this.onListSelect(file)} >{file}</Button><br/></div>
+                                        <div key={idx}><Button key={idx + "dvcspc"} className={this.state.selectFile === file ? "p-button-primary" : "p-button-outlined p-button-secondary"} style={{minWidth:"280px", textAlign:"start", marginBottom:"1px"}} label={file} onClick={() => this.onListSelect(file)} ></Button><br/></div>
                                         )}
                                     </div>
-                                    
-                                /*<ListGroup onSelect={this.onListSelect}>
-                                    {this.state.files.map(file => 
-                                        <ListGroup.Item key={itemKey++} eventKey={file} action >{file}</ListGroup.Item>
-                                        )}
-                                </ListGroup>*/ : <div>저장된 파일 없음</div> }
-
-                                
-                            </Col>
-                        
-                            <Col style={{borderLeft:"5px solid gray"}}>
-                                <pre className="heightPopup">
-                                    <code>
-                                        {this.state.fileJson && JSON.stringify(this.state.fileJson, null, 4)}
-                                    </code>
-                                </pre>
-                            </Col>
-                        </Row>
-                        
-                        <Row style={{marginTop:"10px"}}>
-                            <Col></Col>
-                            <Col xs="auto">
-                                { this.state.class === "node" && 
-                                <Button variant="secondary" size="sm" style={{width:"120px", marginRight:"10px"}}
-                                onClick={this.onAddDevice}>Device로 추가</Button> }
-                                { this.state.canModify &&
-                                <Button variant="secondary" size="sm" style={{width:"100px", marginRight:"10px"}}
-                                onClick={this.onModify}>수정</Button>}
-                                { this.state.canLoad &&
-                                <Button variant="secondary" size="sm" style={{width:"100px", marginRight:"10px"}}
-                                onClick={this.onLoad}>불러오기</Button>}
-                                <Button variant="secondary" size="sm" style={{width:"100px", marginRight:"10px"}}
-                                onClick={this.onDownload}>다운로드</Button>
-                                <Button variant="secondary" size="sm" style={{width:"100px"}}
-                                onClick={this.onRemoveFile}>삭제</Button>
-                            </Col>
-                        </Row>
-                    </Container>
-                    { this.state.addDeviceMessage && 
-                        <div style={{position:"absolute", bottom:"40px", right:"10px", opacity:"0.95"}}>
-                        <Alert variant={this.state.errorMsg === false ? "success" : "danger" } onClose={() => this.setState({addDeviceMessage:null})} dismissible>
-                            {this.state.addDeviceMessage}
-                        </Alert>
+                                    :
+                                    <div>저장된 파일 없음</div>
+                                }
+                                </Panel>
+                            </div>
+                            <div className="p-col">
+                                <Panel header="JSON" style={{marginRight:"10px"}}>
+                                    <div className="heightPopup" style={{marginBottom:"0px"}}>
+                                        <pre style={{fontSize:"13px"}}>
+                                            <code>
+                                                {this.state.fileJson && JSON.stringify(this.state.fileJson, null, 4)}
+                                            </code>
+                                        </pre>
+                                    </div>
+                                </Panel>
+                            </div>
                         </div>
-                    }
-                    <div style={{position:'absolute', bottom:"10px", left:"10px"}}>
-                        <FileUpload style={{height:"31px !important",backgroundColor:'#dddddd  !important'}} mode="basic" name="file" url="/devicespec" accept=".json" maxFileSize={1000000} onUpload={this.onUpload} auto chooseLabel="업로드" multiple/>
-                    </div>
+                        <div className="p-grid p-justify-between" style={{marginTop:"0px",marginLeft:"10px",marginRight:"15px"}}>
+                            <div className="p-col-2" style={{padding:"0px"}}>
+                                <FileUpload style={{height:"31px !important",backgroundColor:'#dddddd  !important'}} mode="basic" name="file" url="/devicespec" accept=".json" maxFileSize={1000000} onUpload={this.onUpload} auto chooseLabel="업로드" multiple/>
+                            </div>
+                            <div className="p-col" style={{padding:"0px"}}>
+                                <div className="p-grid p-justify-end">
+                                    {
+                                        this.state.class === "node" && 
+                                        <div className="p-col-3">
+                                            <Button className="p-button-secondary" label="Device로 추가" style={{width:"130px"}}
+                                                onClick={this.onAddDevice}></Button>
+                                        </div>
+                                    }
+                                    {
+                                        this.state.canModify &&
+                                        <div className="p-col-2">
+                                            <Button className="p-button-secondary" label="수정" style={{width:"100px"}}
+                                                onClick={this.onModify}></Button>
+                                        </div>
+                                    }
+                                    {
+                                        this.state.canLoad &&
+                                        <div className="p-col-2">
+                                            <Button className="p-button-secondary" label="불러오기" style={{width:"100px"}}
+                                                onClick={this.onLoad}></Button>
+                                        </div>
+                                    }
+                                    <div className="p-col-2">
+                                        <Button className="p-button-secondary" label="다운로드" style={{width:"100px"}}
+                                            onClick={this.onDownload}></Button>
+                                    </div>
+                                    <div className="p-col-2">
+                                        <Button className="p-button-secondary" label="삭제" style={{width:"100px"}}
+                                            onClick={this.onRemoveFile}></Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <Toast ref={(el) => this.toastBL = el} position="bottom-right" />
                     </div>
                 </NewWindow>}
             </>

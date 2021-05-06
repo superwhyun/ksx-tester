@@ -239,23 +239,25 @@ const CommSpec = {
         if  (cls === "sensor") {
             if (type === "temperature-sensor")
                 read["starting-register"] = 202;
+            else if (type === "dewpoint-sensor")
+                read["starting-register"] = 202;
             else if (type === "humidity-sensor")
                 read["starting-register"] = 205;
             else if (type === "CO2-sensor")
                 read["starting-register"] = 208;
-            else if (type === "pyranometer-sensor")
+            else if (type === "pyranometer")
                 read["starting-register"] = 211;
             else if (type === "wind-direction-sensor")
                 read["starting-register"] = 214;
             else if (type === "wind-speed-sensor")
                 read["starting-register"] = 217;
-            else if (type === "rain-detector-sensor")
+            else if (type === "rain-detector")
                 read["starting-register"] = 220;
             else if (type === "quantum-sensor")
                 read["starting-register"] = 223;
             else if (type === "soil-moisture-sensor")
                 read["starting-register"] = 226;
-            else if (type === "tensiometer-sensor")
+            else if (type === "tensiometer")
                 read["starting-register"] = 229;
             else if (type === "EC-sensor")
                 read["starting-register"] = 232;

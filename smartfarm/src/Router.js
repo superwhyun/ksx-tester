@@ -17,6 +17,6 @@ export default class Router extends Component {
                         <Redirect from="*" to="/equip" />
                     </Switch>
                 </>
-          );
+        );
     }
 }

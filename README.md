@@ -24,7 +24,6 @@ $ sudo apt-get install -y nodejs
   npm install
   ```
 
-
 - 실행
   - 현재 연결된 usb serialport 보기
     ```
@@ -36,6 +35,18 @@ $ sudo apt-get install -y nodejs
     e.g, node serialserver.js /dev/tty.USB0 ./nodeSpec.json
     ```
 
+###	smartfarm 
+react 기반 웹UI
+
+- 설치
+  ```
+  npm install
+  ```
+- build - 아래 명령어 실행하면 smartfarm/build 디렉토리에 배포됨
+  ```
+  npm run build
+  ```
+
 ###	server
 nodejs 기반 웹서버(smartfarm 을 돌리기 위한)
 
@@ -44,13 +55,12 @@ nodejs 기반 웹서버(smartfarm 을 돌리기 위한)
   npm install
   ```
 - 실행
-  - Default 실행 포트는 8000, 실행되는 포트를 변경하려면 server.js 파일 맨 윗줄의 const port = 8000; 부분을 수정하고 실행
-  - 이미 빌드된 파일들이 build 디렉토리에 포함되어 있기 때문에 아무 작업없이 바로 실행 가능.
-
-
-###	smartfarm 
-react 기반 웹UI
-- smartfarm 디렉토리 안의 build 디렉토리를 target으로 실행되므로 디렉토리 구조가 다음과 같아야 함.
-- UI 소스 수정이 필요 없다면 smartfarm 디렉토리는 추가 작업 필요 없음
-
-
+  - smartfarm 디렉토리 안의 build 디렉토리를 target으로 실행되므로 디렉토리 구조가 다음과 같아야 함.
+  ```
+  server
+  smartfarm/build
+  ```
+  - Default 실행 포트는 8000, 실행되는 포트를 변경하려면 server.js 파일 맨 윗줄의 const port = 8000; 부분을 수정하고 아래 명령어로 실행
+  ```
+  node server.js
+  ```

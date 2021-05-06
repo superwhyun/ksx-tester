@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
-import { Container, Row, Col, Button, Alert } from 'react-bootstrap';
 import NewWindow from 'react-new-window'
+import { Button } from 'primereact/button';
+import { Toast } from 'primereact/toast';
+import { Panel } from 'primereact/panel';
 
 export default class TestSpecListPopup extends Component {
     state = {
         files : null,
         selectFile : null,
-        fileData : null,
-        addDeviceMessage : null,
+        fileData : null
     }
 /*
     constructor(props) {
@@ -71,7 +72,7 @@ export default class TestSpecListPopup extends Component {
 
     onLoad = () => {
         if (this.state.selectFile == null || this.state.fileData == null) {
-            this.setState({addDeviceMessage:"불러올 장비 규격 파일을 선택하세요."});
+            this.toastBL.show({severity:'error', detail:"불러올 장비 규격 파일을 선택하세요.", life: 3000});
             return;
         }
 
@@ -85,7 +86,7 @@ export default class TestSpecListPopup extends Component {
     onRemoveFile = () =>{
         
         if (this.state.selectFile == null) {
-            this.setState({addDeviceMessage:"삭제할 시험파일을 선택하세요."});
+            this.toastBL.show({severity:'error', detail:"삭제할 시험파일을 선택하세요.", life: 3000});
             return;
         }
 
@@ -114,60 +115,52 @@ export default class TestSpecListPopup extends Component {
         return (
             <>
                 {this.props.show &&
-                <NewWindow onUnload={this.onFilesUnload} center={"parent"} title={"시험파일 불러오기"} features={{width:1000, height:800}}>
+                <NewWindow onUnload={this.onFilesUnload} center={"parent"} title={"시험파일 불러오기"} features={{width:1200, height:800}}>
                     <div >
-                    <Container fluid style={{margin:"10px"}}>
-                        <Row style={{marginLeft:"10px", marginBottom:"10px"}}>
-                            <Col></Col>
-                            <Col xs="auto">
-                                <Button variant="secondary" size="sm" style={{width:"100px"}}
-                                    onClick={this.getFiles}>새로고침</Button>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col>
-                                { this.state.files && this.state.files.length > 0 ?
+                        <div className="p-grid p-justify-end">
+                            <div className="p-col-2" style={{margin:"5px",marginRight:"10px"}}>
+                                <Button className="p-button-secondary" label="새로고침" style={{width:"100%"}}
+                                    onClick={this.getFiles}></Button>
+                            </div>
+                        </div>
+                        <div className="p-grid">
+                            <div className="p-col-fixed" style={{width:"310px",paddingRight:"0px"}}>
+                                <Panel header="FILE" style={{marginLeft:"10px"}}>
+                                {
+                                    this.state.files && this.state.files.length > 0 ?
                                     <div className="heightPopup">
                                         {this.state.files.map((file, idx) => 
-                                        <div key={idx}><Button key={idx + "dvcspc"} variant={this.state.selectFile === file ? "primary" : "outline-secondary"} style={{minWidth:"200px", textAlign:"start", marginBottom:"1px"}} onClick={() => this.onListSelect(file)} >{file}</Button><br/></div>
+                                        <div key={idx}><Button key={idx + "dvcspc"} className={this.state.selectFile === file ? "p-button-primary" : "p-button-outlined p-button-secondary"} style={{minWidth:"250px", textAlign:"start", marginBottom:"1px"}} label={file} onClick={() => this.onListSelect(file)} ></Button><br/></div>
                                         )}
                                     </div>
-                                    
-                                /*<ListGroup onSelect={this.onListSelect}>
-                                    {this.state.files.map(file => 
-                                        <ListGroup.Item key={itemKey++} eventKey={file} action >{file}</ListGroup.Item>
-                                        )}
-                                </ListGroup>*/ : <div>저장된 파일 없음</div> }
-
-                                
-                            </Col>
-                        
-                            <Col style={{borderLeft:"5px solid gray"}}>
-                                <pre className="heightPopup">
-                                    <code>
-                                        {this.state.fileData && this.state.fileData}
-                                    </code>
-                                </pre>
-                            </Col>
-                        </Row>
-                        
-                        <Row style={{marginTop:"10px"}}>
-                            <Col></Col>
-                            <Col xs="auto">
-                                <Button variant="secondary" size="sm" style={{width:"100px", marginRight:"10px"}}
-                                onClick={this.onLoad}>불러오기</Button>
-                                <Button variant="secondary" size="sm" style={{width:"100px"}}
-                                onClick={this.onRemoveFile}>삭제</Button>
-                            </Col>
-                        </Row>
-                    </Container>
-                    { this.state.addDeviceMessage && 
-                        <div style={{position:"absolute", bottom:"40px", right:"10px", opacity:"0.95"}}>
-                        <Alert variant="danger" onClose={() => this.setState({addDeviceMessage:null})} dismissible>
-                            {this.state.addDeviceMessage}
-                        </Alert>
+                                    :
+                                    <div>저장된 파일 없음</div>
+                                }
+                                </Panel>
+                            </div>
+                            <div className="p-col">
+                                <Panel header="JSON" style={{marginRight:"10px"}}>
+                                    <div className="heightPopup" style={{marginBottom:"0px"}}>
+                                        <pre style={{fontSize:"13px"}}>
+                                            <code>
+                                                {this.state.fileData && this.state.fileData}
+                                            </code>
+                                        </pre>
+                                    </div>
+                                </Panel>
+                            </div>
                         </div>
-                    }
+                        <div className="p-grid p-justify-end" style={{marginRight:"10px"}}>
+                            <div className="p-col-2">
+                                <Button className="p-button-secondary" label="불러오기" style={{width:"100%"}}
+                                    onClick={this.onLoad}></Button>
+                            </div>
+                            <div className="p-col-2">
+                                <Button className="p-button-secondary" label="삭제" style={{width:"100%"}}
+                                    onClick={this.onRemoveFile}></Button>
+                            </div>
+                        </div>
+                        <Toast ref={(el) => this.toastBL = el} position="bottom-right" />
                     </div>
                 </NewWindow>}
             </>

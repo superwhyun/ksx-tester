@@ -33,4 +33,7 @@ import { Navbar, Nav } from 'react-bootstrap'
             </Nav>
         </Navbar.Collapse>
     </Navbar>
+    /*<div>
+        <TabMenu model={items}/>
+    </div>*/
 );

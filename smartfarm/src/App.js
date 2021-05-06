@@ -8,6 +8,10 @@ import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 
 class App extends Component {
+  componentDidMount() {
+    document.title = "SmartFarm";
+  }
+
   render(){
     return (
       <BrowserRouter>

@@ -1,9 +1,9 @@
 .grid {
-    height: calc(100vh - 400px);
+    height: calc(100vh - 530px);
     width: calc(100% - 20px);
     border: 1px solid grey;
     border-radius: 3px;
-    margin-bottom: 10px;
+    margin: 10px;
 }
 
 .testitem {

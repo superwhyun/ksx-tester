@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
-import { Container, Row, Col, Dropdown, Button, Alert, FormControl } from 'react-bootstrap';
 import * as Data from './data';
+import { Dropdown } from 'primereact/dropdown';
+import { Button } from 'primereact/button';
+import { InputText } from "primereact/inputtext";
+import { Panel } from 'primereact/panel';
 
 export default class TestSpec extends Component {
     state = {
@@ -39,7 +42,7 @@ export default class TestSpec extends Component {
                 return;
             }
 
-            this.state.devicespec = deviceSpec;
+            this.setState({devicespec:deviceSpec});
 
             var dvclist = [];
             var operation = {};
@@ -102,6 +105,8 @@ export default class TestSpec extends Component {
                     if (op) {
                         operation[name] = op;
                     }
+
+                    return dvc;
                 });
             }
 
@@ -124,23 +129,16 @@ export default class TestSpec extends Component {
                 if (op.Operation === this.state.operation) {
                     if (op.Parameters) {
                         return (
-                            //<Row style={{margin:"10px"}}>
-                            <div style={{border:"1px solid gray", padding:"10px", margin:"10px"}}>
-                                Parameter
-                                <Row>
-                                { op.Parameters.map((param, idx) => (
-                                    <Col key={idx} xs="auto">
-                                        <Col xs="auto">
-                                            {param.Parameter}
-                                        </Col>
-                                        <Col xs="auto">
-                                            <input id={'param' + idx}></input>
-                                        </Col>
-                                    </Col>
-                                )) }
-                                </Row>
-                            </div>
-                            //</Row>
+                            <Panel header="Parameter">
+                                <div className="p-d-flex">
+                                    { op.Parameters.map((param, idx) => (
+                                        <div key={idx} className="p-inputgroup" style={{width:"200px",marginRight:"10px"}}>
+                                            <span className="p-inputgroup-addon">{param.Parameter}</span>
+                                            <InputText id={'param' + idx}></InputText>
+                                        </div>
+                                    )) }
+                                </div>
+                            </Panel>
                         )
                     }
 
@@ -158,20 +156,20 @@ export default class TestSpec extends Component {
 
         if (tgs) {
             return (
-                //<Row style={{margin:"10px"}}>
-                <div style={{border:"1px solid gray", padding:"10px", margin:"10px"}}>
-                    Target
-                    <Row>
-                    { tgs.map((tg, idx) => (
-                        <Col key={idx} xs="auto">
-                            <Col xs="auto">
-                                <label><input type="checkbox" id={"target" + idx}></input>{tg}</label>
-                            </Col>
-                        </Col>
-                    )) }
-                    </Row>
-                </div>
-                //</Row>
+                <Panel header="Target">
+                    <div className="p-grid">
+                        { tgs.map((tg, idx) => (
+                            <div key={idx} className="p-col-fixed">
+                                <div className="p-inputgroup">
+                                    <span className="p-inputgroup-addon">
+                                        <input type="checkbox" id={"target" + idx}/>
+                                    </span>
+                                    <span className="p-inputgroup-addon">{tg}</span>
+                                </div>
+                            </div>
+                        )) }
+                    </div>
+                </Panel>
             )
         }
         return (<></>);
@@ -184,20 +182,21 @@ export default class TestSpec extends Component {
 
         if (tgs) {
             return (
-                //<Row style={{margin:"10px"}}>
-                <div style={{border:"1px solid gray", padding:"10px", margin:"10px"}}>
-                    Target
-                    <Row>
-                    { tgs.map((tg, idx) => (
-                        <Col key={idx} xs="auto">
-                            <Col xs="auto">
-                                <label><input type="checkbox" id={"expectchk" + idx}></input>{tg}</label><input style={{width:"40px"}} id={"expect" + idx}></input>
-                            </Col>
-                        </Col>
-                    )) }
-                    </Row>
-                </div>
-                //</Row>
+                <Panel header="Target">
+                    <div className="p-grid">
+                        { tgs.map((tg, idx) => (
+                            <div key={idx} className="p-col-fixed">
+                                <div className="p-inputgroup">
+                                    <span className="p-inputgroup-addon">
+                                        <input type="checkbox" id={"expectchk" + idx}/>
+                                    </span>
+                                    <span className="p-inputgroup-addon">{tg}</span>
+                                    <InputText style={{width:"60px"}} id={"expect" + idx}></InputText>
+                                </div>
+                            </div>
+                        )) }
+                    </div>
+                </Panel>
             )
         }
         return (<></>);
@@ -270,14 +269,14 @@ export default class TestSpec extends Component {
 
             json.device = this.state.device;
             
-            var tgs = this.state.targets[this.state.device];
+            let tgs = this.state.targets[this.state.device];
 
             if (tgs) {
-                var tgsstr = "";
-                for(var i=0; i<tgs.length; i++) {
-                    var tg = tgs[i];
+                let tgsstr = "";
+                for(i=0; i<tgs.length; i++) {
+                    let tg = tgs[i];
 
-                    var chk = doc.getElementById('target' + i).checked;
+                    let chk = doc.getElementById('target' + i).checked;
                     if (chk) {
                         if (tgsstr.length > 0)
                             tgsstr += ",";
@@ -301,16 +300,16 @@ export default class TestSpec extends Component {
 
             json.device = this.state.device;
             
-            var tgs = this.state.targets[this.state.device];
+            let tgs = this.state.targets[this.state.device];
 
             if (tgs) {
-                var tgsstr = "";
-                for(var i=0; i<tgs.length; i++) {
-                    var tg = tgs[i];
+                let tgsstr = "";
+                for(i=0; i<tgs.length; i++) {
+                    let tg = tgs[i];
 
-                    var chk = doc.getElementById('expectchk' + i).checked;
+                    let chk = doc.getElementById('expectchk' + i).checked;
                     if (chk) {
-                        var val = doc.getElementById('expect' + i).value;
+                        let val = doc.getElementById('expect' + i).value;
                         if (!val) {
                             alert("선택한 Target의 값을 입력해야 합니다.");
                             return;
@@ -331,7 +330,7 @@ export default class TestSpec extends Component {
                 json.targets = tgsstr;
             }
         } else if (this.state.command === "SLEEP") {
-            var val = doc.getElementById('timeval').value;
+            let val = doc.getElementById('timeval').value;
 
             if (!val) {
                 alert("시간값을 입력해야 합니다.");
@@ -346,86 +345,55 @@ export default class TestSpec extends Component {
 
     render() {
         //const rtc = this.props.route.params.RtcConnect;
+        //options={this.state.operations[this.state.device] ? this.state.operations[this.state.device] : null}
         return (
-            <div style={{height:"180px"}} ref={this.divRef}>
-                <Container fluid style={{margin:"10px"}}>
-                    <Row style={{marginLeft:"0px", marginBottom:"10px"}}>
-                        <Col xs="auto">
-                            <Dropdown onSelect={(eventKey, event) => {
-                                this.setState({command:eventKey});
-                            }}>
-                                <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                                    {this.state.command}
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                    <Dropdown.Item eventKey={"SET"}>SET</Dropdown.Item>
-                                    <Dropdown.Item eventKey={"GET"}>GET</Dropdown.Item>
-                                    <Dropdown.Item eventKey={"EXPECT"}>EXPECT</Dropdown.Item>
-                                    <Dropdown.Item eventKey={"SLEEP"}>SLEEP</Dropdown.Item>
-                                </Dropdown.Menu>
+            <div style={{height:"240px"}} ref={this.divRef}>
+                <div className="p-grid p-justify-between">
+                <div className="p-grid p-justify-start" style={{margin:"0px"}}>
+                    <div className="p-col-fixed" style={{marginRight:"0px",width:"240px"}}>
+                        <Dropdown value={this.state.command} onChange={(e) => {
+                            this.setState({command:e.value}); }}
+                            options={["SET","GET", "EXPECT","SLEEP"]}>
+                        </Dropdown>
+                    </div>
+                    {
+                        this.state.command !== "SLEEP" &&
+                        <div className="p-col-fixed" style={{marginRight:"0px",width:"240px"}}>
+                            <Dropdown value={this.state.device} placeholder="DEVICE" onChange={(e) => {
+                                this.setState({device:e.value, operation:null}); }}
+                                options={this.state.deviceList}>
                             </Dropdown>
-                        </Col>
-                        { this.state.command !== "SLEEP" &&
-                        <Col xs="auto">
-                            <Dropdown onSelect={(eventKey, event) => {
-                                this.setState({device:eventKey, operation:null});
-                            }}>
-                            <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                                    {this.state.device ? this.state.device : "DEVICE"}
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                    {this.state.deviceList.map((dvc, idx) => (
-                                        <Dropdown.Item key={idx} eventKey={dvc}>{dvc}</Dropdown.Item>
-                                    ))}
-                                </Dropdown.Menu>
+                        </div>
+                    }
+                    {
+                        this.state.command === "SET" &&
+                        <div className="p-col-fixed" style={{marginRight:"0px",width:"240px"}}>
+                            <Dropdown value={this.state.operation} placeholder="OPERATION" onChange={(e) => {
+                                this.setState({operation:e.value}); }}
+                                optionLabel="Operation" optionValue="Operation"
+                                options={this.state.operations[this.state.device]}>
                             </Dropdown>
-                        </Col>}
-                        {/* this.state.command === "SET" &&
-                        <Col xs="auto">
-                            <Button variant="secondary" disabled>opid</Button>
-                        </Col>*/}
-                        { this.state.command === "SET" &&
-                        <Col xs="auto">
-                            <Dropdown onSelect={(eventKey, event) => {
-                                this.setState({operation:eventKey});
-                            }}>
-                            <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                                    {this.state.operation ? this.state.operation : "OPERATION"}
-                                </Dropdown.Toggle>
-                                {this.state.operations[this.state.device] &&
-                                <Dropdown.Menu>
-                                    {this.state.operations[this.state.device].map((op, idx) => (
-                                        <Dropdown.Item key={idx} eventKey={op.Operation}>{op.Operation}</Dropdown.Item>
-                                    ))}
-                                </Dropdown.Menu>}
-                            </Dropdown>
-                        </Col>}
-                        <Col xs="auto">
-                            <Button variant="secondary" style={{width:"80px"}}
-                                onClick={this.onCreate}>추가</Button>
-                        </Col>
-                    </Row>
-                    <Row>
-                        { this.getParameter() }
-                    </Row>
-                    <Row>
-                        { this.getTarget() }
-                    </Row>
-                    <Row>
-                        { this.getExpect() }
-                    </Row>
-                    { this.state.command === "SLEEP" &&
-                    <Row>
-                        <Col xs="auto">
-                            <Col xs="auto">
-                                Time(ms)
-                            </Col>
-                            <Col xs="auto">
-                                <input id="timeval"></input>
-                            </Col>
-                        </Col>
-                    </Row> }
-                </Container>
+                        </div>
+                    }
+                </div>
+                <div className="p-col"></div>
+                    <div className="p-col-fixed">
+                        <Button className="p-button-secondary" label="추가" style={{width:"80px"}}
+                            onClick={this.onCreate}></Button>
+                    </div>
+                    </div>
+                <div>
+                    { this.getParameter() }
+                    { this.getTarget() }
+                    { this.getExpect() }
+                    {
+                        this.state.command === "SLEEP" &&
+                        <div className="p-inputgroup" style={{width:"230px"}}>
+                            <span className="p-inputgroup-addon" style={{width:"130px"}}>Time(ms)</span>
+                            <InputText id="timeval"></InputText>
+                        </div>
+                    }
+                </div>
             </div>
         );
     }

@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import { Container, Row, Col, Dropdown, Button, Alert, FormControl } from 'react-bootstrap';
 import NewWindow from 'react-new-window'
-import * as Data from './data';
 import TestSpec from './TestSpec'
 
 

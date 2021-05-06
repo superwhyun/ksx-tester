@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button } from 'react-bootstrap';
+import { Button } from 'primereact/button';
 //import * as Data from './data';
 import CommSpec from './CommSpec'
 import './CommSpecComponent.css'
@@ -308,62 +308,69 @@ export default class CommSpecComponebt extends Component {
         return (
             <>
             {this.commSpec &&
-                <div style={{marginLeft:"15px"}}>
-                    <p>CommSpec</p>
-                    <div style={{marginLeft:"15px"}}>
-                        <p>read</p>
-                        <div style={{marginLeft:"15px"}}>
-                            starting-register
-                            <input style={{marginLeft:"10px"}} id="read-starting-register" onChange={this.readStartingVal} value={this.state.readStartingRegister || ''}></input>
-                            {this.state.readItems &&
-                            <ul className="list" onDragOver={this.dragOver}>
-                                {this.state.readItems.map((item, i) => {
-                                    return (
-                                        <li className={item.mo === "m" ? "itemM" : (item.mo === "o" ? "itemO" : "itemX")} key={key++}
-                                            data-id={i}
-                                            draggable="true"
-                                            onDragStart={this.dragStart}
-                                            onDragEnd={this.readDragEnd}>
-                                            {item.item}
-                                            {item.mo !== "m" &&
-                                                //<Button style={{float:"right"}} size="sm" variant="danger" onClick={()=> this.optionBtn("read", item)}>X</Button>
-                                                <Button style={{float:"right",margin:"-3px"}} size="sm" variant={item.mo === "o" ? "danger" : "success"} onClick={()=> {
-                                                    this.optionBtn("read", item)
-                                                }}>{item.mo === "o" ? "X" : "O"}</Button>
-                                            }
-                                        </li>
-                                    )
-                                })}
-                            </ul>}
+                <div className="card">
+                    <span className="p-inputgroup-addon" style={{width:"378px"}}>CommSpec</span>
+                    <div style={{marginLeft:"5px",marginRight:"5px"}}>
+                        <div style={{marginLeft:"0px"}}>
+                            <div className="card" style={{margin:"5px"}}>
+                                <span className="p-inputgroup-addon" style={{width:"356px",height:"30px"}}>read</span>
+                                <div style={{marginLeft:"10px",marginRight:"10px",marginTop:"5px"}}>
+                                    starting-register
+                                    <input style={{marginLeft:"10px",width:"207px"}} id="read-starting-register" onChange={this.readStartingVal} value={this.state.readStartingRegister || ''}></input>
+                                    {this.state.readItems &&
+                                    <ul className="list" onDragOver={this.dragOver}>
+                                        {this.state.readItems.map((item, i) => {
+                                            return (
+                                                <li className={item.mo === "m" ? "itemM" : (item.mo === "o" ? "itemO" : "itemX")} key={key++}
+                                                    data-id={i}
+                                                    draggable="true"
+                                                    onDragStart={this.dragStart}
+                                                    onDragEnd={this.readDragEnd}>
+                                                    {item.item}
+                                                    {item.mo !== "m" &&
+                                                        //<Button style={{float:"right"}} size="sm" variant="danger" onClick={()=> this.optionBtn("read", item)}>X</Button>
+                                                        <Button style={{float:"right",margin:"-3px",height:"30px"}} className={item.mo === "o" ? "p-button-danger" : "p-button-success"} icon={item.mo === "o" ? "pi pi-times" : "pi pi-check"} onClick={()=> {
+                                                            this.optionBtn("read", item)
+                                                        }}></Button>
+                                                    }
+                                                </li>
+                                            )
+                                        })}
+                                    </ul>}
+                                </div>
+                            </div>
                         </div>
+                        {this.state.writeItems && 
+                        <div style={{}}>
+                            <div className="card" style={{margin:"5px"}}>
+                                <span className="p-inputgroup-addon" style={{width:"356px",height:"30px"}}>write</span>
+                                <div style={{marginLeft:"10px",marginRight:"10px",marginTop:"5px"}}>
+                                    starting-register
+                                    <input style={{marginLeft:"10px",width:"207px"}} id="write-starting-register" onChange={this.writeStartingVal} value={this.state.writeStartingRegister || ''}></input>
+                                    <ul className="list" onDragOver={this.dragOver}>
+                                        {this.state.writeItems.map((item, i) => {
+                                            return (
+                                                <li className={item.mo === "m" ? "itemM" : (item.mo === "o" ? "itemO" : "itemX")} key={key++}
+                                                    data-id={i}
+                                                    draggable="true"
+                                                    onDragStart={this.dragStart}
+                                                    onDragEnd={this.writeDragEnd}>
+                                                    {item.item}
+                                                    {item.mo !== "m" &&
+                                                        //<Button style={{float:"right"}} size="sm" variant="danger" onClick={()=> this.optionBtn("read", item)}>X</Button>
+                                                        <Button style={{float:"right",margin:"-3px"}} size="sm" variant={item.mo === "o" ? "danger" : "success"} onClick={()=> {
+                                                            this.optionBtn("write", item)
+                                                        }}>{item.mo === "o" ? "X" : "O"}</Button>
+                                                    }
+                                                </li>
+                                            )
+                                        })}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        }
                     </div>
-                    {this.state.writeItems && 
-                    <div style={{marginLeft:"15px"}}>
-                        <p>write</p>
-                        <div style={{marginLeft:"15px"}}>
-                            starting-register
-                            <input style={{marginLeft:"10px"}} id="write-starting-register" onChange={this.writeStartingVal} value={this.state.writeStartingRegister || ''}></input>
-                            <ul className="list" onDragOver={this.dragOver}>
-                                {this.state.writeItems.map((item, i) => {
-                                    return (
-                                        <li className={item.mo === "m" ? "itemM" : (item.mo === "o" ? "itemO" : "itemX")} key={key++}
-                                            data-id={i}
-                                            draggable="true"
-                                            onDragStart={this.dragStart}
-                                            onDragEnd={this.writeDragEnd}>
-                                            {item.item}
-                                            {item.mo !== "m" &&
-                                                //<Button style={{float:"right"}} size="sm" variant="danger" onClick={()=> this.optionBtn("read", item)}>X</Button>
-                                                <Button style={{float:"right",margin:"-3px"}} size="sm" variant={item.mo === "o" ? "danger" : "success"} onClick={()=> {
-                                                    this.optionBtn("write", item)
-                                                }}>{item.mo === "o" ? "X" : "O"}</Button>
-                                            }
-                                        </li>
-                                    )
-                                })}
-                            </ul>
-                        </div>
-                    </div>}
                 </div>
             }
             </>
