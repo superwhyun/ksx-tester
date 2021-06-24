@@ -1,6 +1,7 @@
 const Data = require('./data');
 
 function wrongCommand(item) {
+    console.trace();
     item.error = '(잘못된 명령어)';
 }
 
@@ -17,6 +18,9 @@ function parseDeviceSpec(spec) {
 
     try {
         let node = {};
+
+        node.type = spec.Type;
+
         node.read = {};
         node.read.start = spec.CommSpec[Data.commSpecVer].read['starting-register'];
 
@@ -50,6 +54,9 @@ function parseDeviceSpec(spec) {
         if (spec.Devices) {
             spec.Devices.map((dvc, idx) => {
                 let sub = {};
+
+                sub.type = dvc.Type;
+
                 sub.read = {};
 
                 if (dvc.CommSpec[Data.commSpecVer].read['starting-register']) {
@@ -100,6 +107,7 @@ function parseSet(device, testItem) {
 
     if (sp.length != 3 && sp.length != 4) {
         wrongCommand(testItem);
+        
         return;
     }
 
@@ -146,7 +154,14 @@ function parseSet(device, testItem) {
     }
 
     let operation = oper[1];
+
     let opSpec = Data.operationSpec[operation];
+
+    if (dspec.type.indexOf('nutrient-supply') >= 0) {
+        if (operation === 'on') {
+            opSpec = Data.operationSpec['nutrient-supply-on'];
+        }
+    }
 
     testItem.set = {};
     testItem.set.operation = operation;
@@ -192,6 +207,7 @@ function parseSet(device, testItem) {
             }
 
             if (!dspec.write[paval[0]]) {
+                console.log(paval[0]);
                 wrongCommand(testItem);
                 return;
             }

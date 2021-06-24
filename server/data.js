@@ -62,8 +62,8 @@ const itemSpec = {
         type : 'uint32'
     },
     'on-sec' : {
-        size: 1,
-        type: 'uint16'
+        size: 2,
+        type: 'uint32'
     },
     'start-area' : {
         size : 1,
@@ -104,7 +104,13 @@ const operationSpec = {
     control : {
         value : 2,
         size : 1,
-        type : 'uint16'
+        type : 'uint16',
+        parameter : {
+            control : {
+                size : 1,
+                type : 'uint16',
+            }
+        }
     },
     open : {
         value : 301,
@@ -204,7 +210,58 @@ const operationSpec = {
                 type : 'int16',
             }
         }
-    }
+    },
+    'nutrient-supply-on' : {
+        value : 401,
+        size : 1,
+        type : 'uint16'
+    },
+    'area-on' : {
+        value : 402,
+        size : 1,
+        type : 'uint16',
+        parameter : {
+            'start-area': {
+                size: 1,
+                type: 'uint16',
+            },
+            'stop-area': {
+                size: 1,
+                type: 'uint16',
+            },
+            'on-sec': {
+                size: 2,
+                type: 'uint32',
+            },
+        }
+    },
+    'param-on' : {
+        value : 403,
+        size : 1,
+        type : 'uint16',
+        parameter : {
+            'start-area': {
+                size: 1,
+                type: 'uint16',
+            },
+            'stop-area': {
+                size: 1,
+                type: 'uint16',
+            },
+            'on-sec': {
+                size: 2,
+                type: 'uint32',
+            },
+            'EC': {
+                size: 2,
+                type: 'float',
+            },
+            'pH': {
+                size: 2,
+                type: 'float',
+            },
+        }
+    },
 }
 
 exports.commSpecVer = commSpecVer;
