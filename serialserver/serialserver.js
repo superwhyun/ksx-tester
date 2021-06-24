@@ -4,6 +4,12 @@ const options = {
     baudRate: 9600
 }
 
+const readline = require('readline');
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
 const commSpecVer = "KS-X-3267:2021";
 
 const itemSpec = {
@@ -68,8 +74,8 @@ const itemSpec = {
         type : 'uint32'
     },
     'on-sec' : {
-        size: 1,
-        type: 'uint16'
+        size: 2,
+        type: 'uint32'
     },
     'start-area' : {
         size : 1,
@@ -100,6 +106,8 @@ const itemSpec = {
         type : 'uint16'
     }
 }
+
+let regmap = {};
 
 function printUsage() {
     console.log('Usage:');
@@ -133,9 +141,21 @@ function printSerialPorts() {
     });
 }
 
-function writeRegister(holding, item, reg) {
-    let val = randomVal();
-    console.log(reg + ' : ' + val);
+function printCmdUsage() {
+    console.log('!!! Wrong cmd !!!');
+    console.log('get');
+    console.log('or');
+    console.log('set [regAddr] [value]');
+    console.log('ex) get');
+    console.log('ex) set 301 0');
+    
+}
+
+function writeRegister(holding, item, name, reg, val) {
+    //console.log(reg + ' : ' + val);
+    
+    regmap[reg] = {'name':name, 'size':item.size, 'type':item.type, 'value':val};
+
     if (item.size == 1) {
         if (item.type[0] == 'u') {
             holding.writeUInt16BE(val, reg * 2);
@@ -176,7 +196,7 @@ function initHoldingRegister(spec, holding) {
         let readreg = spec.CommSpec[commSpecVer].read['starting-register'];
 
         spec.CommSpec[commSpecVer].read.items.map((item) => {
-            readreg = writeRegister(holding, itemSpec[item], readreg);
+            readreg = writeRegister(holding, itemSpec[item], item, readreg, randomVal());
         });
 
         if (spec.Devices) {
@@ -186,7 +206,7 @@ function initHoldingRegister(spec, holding) {
                 }
 
                 dvc.CommSpec[commSpecVer].read.items.map((item) => {
-                    readreg = writeRegister(holding, itemSpec[item], readreg);
+                    readreg = writeRegister(holding, itemSpec[item], item, readreg, randomVal());
                 });
             });
         }
@@ -199,6 +219,7 @@ let args = process.argv.slice(2);
 
 if (!args || args.length == 0) {
     printUsage();
+    process.exit();
 } else if (args[0] === 'list') {
     printSerialPorts();
 } else {
@@ -222,7 +243,7 @@ if (!args || args.length == 0) {
     } catch(e) {
         console.log(e);
         return;
-    }    
+    }
 
     const holding = Buffer.alloc(10000);
     const socket = new SerialPort(path, options);
@@ -273,6 +294,48 @@ if (!args || args.length == 0) {
     });
     
     initHoldingRegister(dvcSpec, server.holding);
+
+    console.log(regmap);
+
+    rl.on('line', function (line) {
+        if (line === 'get') {
+            console.log(regmap);
+        } else {
+            let sp = line.split(' ');
+            
+            if (sp[0] !== 'set') {
+                printCmdUsage();
+                return;
+            }
+
+            let reg = parseInt(sp[1]);
+            if (!reg) {
+                printCmdUsage();
+                return;
+            }
+
+            let value = parseInt(sp[2]);
+            if (isNaN(value)) {
+                printCmdUsage();
+                return;
+            }
+
+            let oldval = regmap[reg];
+
+            if (!oldval) {
+                console.log(reg + " not exist.");
+                return;
+            }
+            
+            oldval['value'] = value;
+
+            writeRegister(server.holding, oldval, oldval['name'], reg, value);
+            console.log('ok!');
+
+        }
+    }).on('close', function(){
+        process.exit();
+    });
 
     //server.holding.writeUInt16BE(8,201*2);
 
