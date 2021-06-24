@@ -320,7 +320,7 @@ const CommSpec = {
                 }
             } else if (type === "switch") {
                 read.items = [
-                    item("opid"),
+                    item("status"),
                 ];
     
                 if (subtype === "level0") {

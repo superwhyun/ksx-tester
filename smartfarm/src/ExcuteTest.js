@@ -33,11 +33,13 @@ export default class ExcuteTest extends Component {
     }
 
     setSpec = (device, test) => {
-        console.log(device);
-        console.log(test);
+        //console.log(device);
+        //console.log(test);
 
         this.deviceSpec = device;
         this.testSpec = test;
+
+        this.setState({imageURL:null, imageURLDetail:null, isLoading:false, errorMsg:null});
 
         this.getSerialport();
     }

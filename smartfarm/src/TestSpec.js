@@ -137,6 +137,11 @@ export default class TestSpec extends Component {
                                             <InputText id={'param' + idx}></InputText>
                                         </div>
                                     )) }
+                                    { op.Operation === "control" && 
+                                        <div>
+                                            로컬제어:1, 원격제어:2, 수동제어:3
+                                        </div>
+                                    }
                                 </div>
                             </Panel>
                         )

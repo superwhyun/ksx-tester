@@ -3,37 +3,37 @@ import CommSpec from './CommSpec';
 export const commSpecVer = "KS-X-3267:2021";
 
 export const operationSpec = [
-    {
+    /*{
         Class:"node",
         Type:"sensor-node/level1",
         Operations:[{Operation:"reset", Value:1}]
-    },
+    },*/
     {
         Class:"node",
         Type:"actuator-node/level1",
-        Operations:[{Operation:"reset", Value:1}]
+        Operations:[{Operation:"control", Value:2, Parameters:[{Parameter:"control", MO:"m", type:"uint16"}]}]
     },
-    {
+    /*{
         Class:"node",
         Type:"actuator-node/level2",
         Operations:[
             {Operation:"reset", Value:1},
             {Operation:"control", Value:2, Parameters:[{Parameter:"control", MO:"m", type:"uint16"}]},
         ]
-    },
+    },*/
     {
         Class:"node",
         Type:"integrated-node/level1",
-        Operations:[{Operation:"reset", Value:1}]
+        Operations:[{Operation:"control", Value:2, Parameters:[{Parameter:"control", MO:"m", type:"uint16"}]}]
     },
-    {
+    /*{
         Class:"node",
         Type:"integrated-node/level2",
         Operations:[
             {Operation:"reset", Value:1},
             {Operation:"control", Value:2, Parameters:[{Parameter:"control", MO:"m", type:"uint16"}]},
         ]
-    },
+    },*/
     {
         Class:"actuator",
         Type:"retractable/level0",
@@ -67,6 +67,47 @@ export const operationSpec = [
             {Operation:"set-config", Value:306, Parameters:[
                 {Parameter:"opentime", MO:"m", type:"uint16"},
                 {Parameter:"closetime", MO:"m", type:"uint16"},
+            ]},
+        ]
+    },
+    {
+        Class:"actuator",
+        Type:"nutrient-supply/level1",
+        Operations:[
+            {Operation:"on", Value:401},
+            {Operation:"off", Value:0},
+        ]
+    },
+    {
+        Class:"actuator",
+        Type:"nutrient-supply/level2",
+        Operations:[
+            {Operation:"on", Value:401, label:"ffff"},
+            {Operation:"off", Value:0},
+            {Operation:"area-on", Value:402, Parameters:[
+                {Parameter:"start-area", MO:"m", type:"uint16"},
+                {Parameter:"stop-area", MO:"m", type:"uint16"},
+                {Parameter:"on-sec", MO:"m", type:"uint32"},
+            ]},
+        ]
+    },
+    {
+        Class:"actuator",
+        Type:"nutrient-supply/level3",
+        Operations:[
+            {Operation:"on", Value:401},
+            {Operation:"off", Value:0},
+            {Operation:"area-on", Value:402, Parameters:[
+                {Parameter:"start-area", MO:"m", type:"uint16"},
+                {Parameter:"stop-area", MO:"m", type:"uint16"},
+                {Parameter:"on-sec", MO:"m", type:"uint32"},
+            ]},
+            {Operation:"param-on", Value:403, Parameters:[
+                {Parameter:"start-area", MO:"m", type:"uint16"},
+                {Parameter:"stop-area", MO:"m", type:"uint16"},
+                {Parameter:"on-sec", MO:"m", type:"uint32"},
+                {Parameter:"EC", MO:"m", type:"float"},
+                {Parameter:"pH", MO:"m", type:"float"},
             ]},
         ]
     },
