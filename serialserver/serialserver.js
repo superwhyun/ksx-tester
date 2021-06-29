@@ -192,6 +192,7 @@ function writeRegister(holding, item, name, reg, val) {
 function initHoldingRegister(spec, holding) {
     let rslt = {};
 
+    // Make Holding Register for 'read'
     try {
         let readreg = spec.CommSpec[commSpecVer].read['starting-register'];
 
@@ -213,6 +214,32 @@ function initHoldingRegister(spec, holding) {
     } catch (e) {
         console.log(e);
     }
+
+
+    // Make Holding Register for 'write'
+    try {
+        let writereg = spec.CommSpec[commSpecVer].write['starting-register'];
+
+        spec.CommSpec[commSpecVer].write.items.map((item) => {
+            writereg = writeRegister(holding, itemSpec[item], item, writereg, randomVal());
+        });
+
+        if (spec.Devices) {
+            spec.Devices.map((dvc, idx) => {
+                if (dvc.CommSpec[commSpecVer].write['starting-register']) {
+                    writereg = dvc.CommSpec[commSpecVer].write['starting-register'];
+                }
+
+                dvc.CommSpec[commSpecVer].write.items.map((item) => {
+                    writereg = writeRegister(holding, itemSpec[item], item, writereg, randomVal());
+                });
+            });
+        }
+    } catch (e) {
+        console.log(e);
+    }
+
+
 }
 
 let args = process.argv.slice(2);

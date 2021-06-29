@@ -1,0 +1,16 @@
+{
+    "Class": "node",
+    "Type": "sensor-node/level0",
+    "Model": "RPI3",
+    "Name": "SensorNode",
+    "CommSpec": {
+        "KS-X-3267:2021": {
+            "read": {
+                "starting-register": 201,
+                "items": [
+                    "status"
+                ]
+            }
+        }
+    }
+}
